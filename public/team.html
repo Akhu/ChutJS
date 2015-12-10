@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Your page title here :)</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+    <div class="row">
+      <ul id="team">
+      </ul>
+    </div>
+    <div class="row">
+      <div class="twelve column">
+        <h4>Chut JS</h4>
+        <form class="form">
+
+        <input type="text" id="username" placeholder="Prénom ici"/>
+        <label for="statusOk">Tu peux me parler</label>
+        <input id="statusOk" type="radio" name="status"/> Disponible
+        <label for="statusSoon">Disponible dans 5 minutes</label>
+        <input id="statusSoon" type="radio" name="status"/> Bientôt disponible
+        <label for="statusNope">NAN #focus</label>
+        <input id="statusNope" type="radio" name="status"/> Ne pas déranger
+        </div>
+        <div class="row">
+          <button class="button-primary" id="sendUsername">Go !</button>
+        </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" >
+  var socket = io.connect('http://localhost:3000');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+</script>
+
+</html>
