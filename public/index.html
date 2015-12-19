@@ -21,6 +21,7 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/design.css">
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -33,121 +34,175 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
     <h4>Chut JS</h4>
-    <h5 id="me"></h5>
-    <div class="row" id="team">
-      <ul>
 
-      </ul>
-    </div>
-    <div class="row">
-      <div class="twelve column">
+    <div class="four columns" >
+      <div class="row" id="profil-infos" style="display:none;">
+        <h5 id="me"></h5>
+        <hr>
+        <select id="change-status">
+          <option value="free">
+            Disponible
+          </option>
+          <option value="soon">
+            Bientôt Disponible
+          </option>
+          <option value="nope">
+            Ne pas déranger
+          </option>
+        </select>
 
+        <button id="logout" class="button button-danger">Logout</button>
+      </div>
+      <div class="row">
         <form class="form" id="login" style="display:none">
 
-        <label>Entres ton prénom</label>
-        <div class="row">
+          <label>Entres ton prénom</label>
+          <div class="row">
 
-        <input type="text" id="username" placeholder="Prénom ici"/>
-        <label for="statusOk">Tu peux me parler</label>
-        <input id="statusOk" type="radio" name="status" value="free"/> Disponible
-        <label for="statusSoon">Disponible dans 5 minutes</label>
-        <input id="statusSoon" type="radio" name="status" value="soon"/> Bientôt disponible
-        <label for="statusNope">NAN #focus</label>
-        <input id="statusNope" type="radio" name="status" value="nope"/> Ne pas déranger
-        </div>
-        <div class="row">
-          <button class="button-primary" id="sendUsername">Go !</button>
-        </div>
+            <input type="text" id="username" placeholder="Prénom ici"/>
+            <label for="statusOk">Tu peux me parler</label>
+            <input id="statusOk" type="radio" name="status" value="free"/> Disponible
+            <label for="statusSoon">Disponible dans 5 minutes</label>
+            <input id="statusSoon" type="radio" name="status" value="soon"/> Bientôt disponible
+            <label for="statusNope">NAN #focus</label>
+            <input id="statusNope" type="radio" name="status" value="nope"/> Ne pas déranger
+          </div>
+          <div class="row">
+            <button class="button-primary" id="sendUsername">Go !</button>
+          </div>
         </form>
 
       </div>
     </div>
+    <div class="seven columns">
+      <div class="row" id="team">
+        <ul>
+
+        </ul>
+      </div>
+    </div>
+
   </div>
 
-<!-- End Document
+  <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 </body>
 
 <script src="js/vendor/jquery-1.11.2.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  $(document).ready(function(){
-    var socket = io.connect('http://192.168.1.16:3000');
-    var currentUser;
-    var connected = false;
-    if(typeof(Storage) !== "undefined") {
-      console.log('Local Storage : ok');
-      //Check if a user exists :
-      if(typeof localStorage.user != 'undefined'){
-          currentUser = JSON.parse(localStorage.user);
-          console.log(currentUser);
-          $('#me').text('Salut '+currentUser.username);
-          connected = true;
-          socket.emit('login', currentUser);
-      }else{
-        $('#login').show('fast');
-      }
-    } else {
-      alert('Navigateur non pris en charge, rien ne sera sauvegardé :(');
+$(document).ready(function(){
+  var socket = io.connect('http://localhost:3000');
+  var currentUser;
+  var connected = false;
+  if(typeof(Storage) !== "undefined") {
+    console.log('Local Storage : ok');
+    //Check if a user exists :
+    if(typeof localStorage.user !== 'undefined' ){
+      currentUser = JSON.parse(localStorage.user);
+      //console.log(currentUser);
+      socket.emit('login', currentUser);
+    }else{
+      $('#login').show('fast');
     }
+  } else {
+    alert('Navigateur non pris en charge, rien ne sera sauvegardé :(');
+  }
 
-    $("#sendUsername").click(function(e){
-      e.preventDefault();
-      var data = getFormData();
-      socket.emit('login', data);
-    })
-
-    socket.on('login done',function(data){
-       $("#login").hide('fast');
-       localStorage.setItem('user', JSON.stringify(data.me))
-       currentUser = JSON.parse(localStorage.user);
-       connected = true;
-       console.log(data);
-       refreshTeam(data.team);
-    });
-
-    socket.on('refreshTeam', function(data){
-      refreshTeam(data);
-    })
-
-    function getFormData(){
-
-      var username = $("#username").val();
-      var status = $("input:radio[name ='status']:checked").val();
-      var data = {'username' : username, 'status' : status};
-      return data;
-    }
-
-    function statusToText(status){
-      switch (status){
-        case 'free' :
-          return 'Disponible';
-          break;
-        case 'soon' :
-          return 'Bientôt disponible';
-          break;
-        case 'nope' :
-          return 'Occupé!';
-          break;
-        case 'away' :
-          return 'Absent';
-          break;
-        default:
-          return 'Statut inconnu';
-          break
-      }
-    }
-
-
-
-    function refreshTeam(teamArray){
-       $('#team ul').text('');
-       teamArray.forEach(function(user,index){
-         var statusText = statusToText(user.status);
-         $('#team ul').append('<li class="teammate"><b>'+user.username+'</b> '+statusText+'</li>');
-       });
-    }
+  $("#sendUsername").click(function(e){
+    e.preventDefault();
+    var data = getFormData();
+    socket.emit('login', data);
   })
+
+  $("#change-status").change(function(){
+     var value;
+     $("#change-status option:selected").each(function(){
+        value = $(this).val();
+        currentUser.status = value;
+        socket.emit('change status', currentUser);
+     })
+  })
+
+  $("#logout").click(function(e){
+    e.preventDefault();
+    socket.emit('logout', currentUser);
+  });
+
+  socket.on('logout done', function(){
+    localStorage.clear();
+    $('#profil-infos').fadeOut();
+    $('#team').fadeOut();
+    $('#login').fadeIn('fast');
+  })
+
+  socket.on('me updated', function(data){
+    currentUser = data;
+    saveCurrentUserToLocal(currentUser);
+  })
+
+  socket.on('login done',function(data){
+    saveCurrentUserToLocal(data);
+    currentUser = JSON.parse(localStorage.user);
+    $("#login").hide('fast');
+    $('#profil-infos').fadeIn('fast');
+    $('#me').text('Salut '+currentUser.username);
+    //console.log(data);
+    connected = true;
+  });
+
+  socket.on('refreshTeam', function(data){
+    console.log(data);
+    refreshTeam(data);
+  })
+
+  function saveCurrentUserToLocal(user){
+     localStorage.setItem('user', JSON.stringify(user));
+  }
+
+  function getFormData(){
+
+    var username = $("#username").val();
+    var status = $("input:radio[name ='status']:checked").val();
+    var data = {'username' : username, 'status' : status};
+    return data;
+  }
+
+  function statusToText(status){
+    switch (status){
+      case 'free' :
+      return 'Disponible';
+      break;
+      case 'soon' :
+      return 'Bientôt disponible';
+      break;
+      case 'nope' :
+      return 'Occupé!';
+      break;
+      case 'away' :
+      return 'Absent';
+      break;
+      default:
+      return 'Statut inconnu';
+      break
+    }
+  }
+
+
+
+  function refreshTeam(teamArray){
+    $('#team ul').text('');
+    teamArray.forEach(function(user,index){
+      var statusText = statusToText(user.status);
+      if(!user.connected){
+        $('#team ul').append('<li class="teammate disconnected"><b>'+user.username+'</b> Disconnected </li>');
+      }else{
+        $('#team ul').append('<li class="teammate"><b>'+user.username+'</b> '+statusText+'</li>');
+      }
+
+    });
+  }
+})
 
 </script>
 
