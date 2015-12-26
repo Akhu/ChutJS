@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     Notification.requestPermission();
 });
 
-function notifyMe() {
+function notifyMe(notificationText,notificationTitle) {
   if (!Notification) {
     alert('Desktop notifications not available in your browser. Try Chromium.');
     return;
@@ -13,13 +13,13 @@ function notifyMe() {
   if (Notification.permission !== "granted")
     Notification.requestPermission();
   else {
-    var notification = new Notification('Notification title', {
-      icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
-      body: "Hey there! You've been notified!",
+    var notification = new Notification(notificationTitle, {
+      icon: '/images/chut-logo.png',
+      body: notificationText,
     });
 
     notification.onclick = function () {
-      window.open("http://stackoverflow.com/a/13328397/1269037");
+      window.open('http://localhost:3000/');
     };
 
   }
@@ -44,6 +44,15 @@ $(document).ready(function(){
   } else {
     alert('Navigateur non pris en charge, rien ne sera sauvegardé :(');
   }
+  $("#chut-all").click(function(e){
+    e.preventDefault();
+    if(currentUser.chutCount <= 0){
+      return false;
+    }else{
+      socket.emit('chut',{to:'all', me:currentUser});
+    }
+
+  })
 
   $("#sendUsername").click(function(e){
     e.preventDefault();
@@ -57,6 +66,8 @@ $(document).ready(function(){
         value = $(this).val();
         currentUser.status = value;
         socket.emit('change status', currentUser);
+        saveCurrentUserToLocal(currentUser);
+        refreshMe(currentUser);
      })
   })
 
@@ -64,6 +75,14 @@ $(document).ready(function(){
     e.preventDefault();
     socket.emit('logout', currentUser);
   });
+
+  socket.on('chut', function(data){
+      notifyMe('Faites moins de bruit, cela déconcentre vos collègues :x','Chut !');
+  });
+
+  socket.on('chut done', function(data){
+
+  })
 
   socket.on('logout done', function(){
     localStorage.clear();
@@ -75,6 +94,7 @@ $(document).ready(function(){
   socket.on('me updated', function(data){
     currentUser = data;
     saveCurrentUserToLocal(currentUser);
+    refreshMe(currentUser);
   })
 
   socket.on('login done',function(data){
@@ -84,6 +104,7 @@ $(document).ready(function(){
     $('#profil-infos').fadeIn('fast');
     $('#me').text('Salut '+currentUser.username);
     //console.log(data);
+    refreshMe(currentUser);
     connected = true;
   });
 
@@ -94,6 +115,18 @@ $(document).ready(function(){
 
   function saveCurrentUserToLocal(user){
      localStorage.setItem('user', JSON.stringify(user));
+  }
+
+  function refreshMe(user){
+    if(user.chutCount <= 0){
+      $('#remaining-chut').attr('disabled','disabled');
+    }else{
+      $('#remaining-chut').removeAttr('disabled');
+    }
+    $('#remaining-chut').text(user.chutCount);
+    $('#my-status').text(statusToText(user.status));
+    $('#my-status').removeClass('free').removeClass('nope').removeClass('soon');
+    $('#my-status').addClass(user.status);
   }
 
   function getFormData(){
@@ -124,8 +157,6 @@ $(document).ready(function(){
     }
   }
 
-
-
   function refreshTeam(teamArray){
     $('#team ul').text('');
     teamArray.forEach(function(user,index){
@@ -133,7 +164,7 @@ $(document).ready(function(){
       if(!user.connected){
         $('#team ul').append('<li class="teammate disconnected"><b>'+user.username+'</b> Disconnected </li>');
       }else{
-        $('#team ul').append('<li class="teammate"><b>'+user.username+'</b> '+statusText+'</li>');
+        $('#team ul').append('<li class="teammate"><span class="status-box '+user.status+'">'+statusText+'</span> <b>'+user.username+'</b>  </li>');
       }
 
     });

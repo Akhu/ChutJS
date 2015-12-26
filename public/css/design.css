@@ -4,6 +4,55 @@
   border-color: #ED5565;
 }
 
+.button-black{
+  color: #FFF;
+  background-color: #666;
+  border-color: #888;
+}
+
+.button-danger:hover{
+  border-color: #FFBFBF;
+}
+
+.status-box{
+  font-size: 12px;
+  background-color: #555;
+  color:white;
+  font-weight: 600;
+  display: inline-block;
+  padding:2px 3px;
+  border-radius: 3px;
+  border: 1px solid #777;
+  text-shadow: 1px 0px 0px #444;
+}
+
+.status-box.free{
+  border-color: #A0D468;
+  background-color: #A0D468;
+  text-shadow: 1px 0px 0px #A0D468;
+}
+
+.status-box.nope{
+  border-color: #ED5565;
+  background-color: #DA4453;
+  text-shadow: 1px 0px 0px #ED5565;
+}
+
+.status-box.soon{
+  border-color: #FFCE54;
+  background-color: #F6BB42;
+  text-shadow: 1px 0px 0px #FFCE54;
+}
+
+.button-black:hover{
+  border-color: #AAA;
+}
+
+.button-black:hover,.button-danger:hover{
+  color:#FFF;
+
+}
+
 .disconnected{
   color: #AAA;
 }

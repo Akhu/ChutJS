@@ -60,6 +60,33 @@ io.on('connection', function (socket) {
   socket.on('connect', function(socket){
 
   })
+
+	socket.on('chut', function(data){
+		 if(data.to == 'all'){
+
+			 io.emit('chut',{to : 'all'});
+		 }else{
+			 console.log(io.clients);
+		 }
+
+		 Models.User.findOne({'username' :  data.me.username }, function(err,user){
+			  if(err){
+					console.log(err);
+				}
+				if(user != null){
+					user.chutCount = user.chutCount - 1;
+					user.save(function(err){
+						if(err){ console.log(err) }
+						socket.emit('me updated', user);
+					})
+
+				}
+
+		 })
+
+
+	})
+
   socket.on('login', function (data) {
     var user;
     console.log(data);
@@ -71,7 +98,7 @@ io.on('connection', function (socket) {
         console.log(err);
       }
       if(user != null){
-        console.log('user already connect : '+data.username );
+        console.log('user already connected : '+data.username );
         user.connected = true;
         user.status = data.status;
         user.save(function(err){
